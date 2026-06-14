@@ -18,9 +18,13 @@ from database import get_db
 
 app = FastAPI(title="Xeno AI-Native CRM Backend")
 
+# Corrected Production-Ready CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://xeno-crm-sprint.vercel.app",  # Your live Vercel frontend
+        "http://localhost:3000"                # Allows local development to still work
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
