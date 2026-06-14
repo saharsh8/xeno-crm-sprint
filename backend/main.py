@@ -14,9 +14,10 @@ from pydantic import BaseModel
 import httpx
 import models
 import ai_agent
-from database import get_db
+from database import get_db, engine
 
 app = FastAPI(title="Xeno AI-Native CRM Backend")
+models.Base.metadata.create_all(bind=engine)
 
 # Corrected Production-Ready CORS configuration
 app.add_middleware(
