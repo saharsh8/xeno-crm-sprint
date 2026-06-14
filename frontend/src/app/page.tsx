@@ -5,6 +5,9 @@ import { Users, Send, BarChart3, Bot, X, Sparkles, RefreshCcw, Search, Filter, E
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Toaster, toast } from 'sonner';
 
+// Safely determine the API URL based on the environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function CRMDashboard() {
   const [activeTab, setActiveTab] = useState('audience');
   
@@ -51,7 +54,7 @@ export default function CRMDashboard() {
 
   // Fetch Sources
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/customers/sources')
+    fetch(`${API_BASE_URL}/api/v1/customers/sources`)
       .then(res => res.json())
       .then(data => setAvailableSources(["All Data", ...data.sources]))
       .catch(() => toast.error("Could not fetch data sources."));
@@ -60,7 +63,7 @@ export default function CRMDashboard() {
   // Fetch Audience
   useEffect(() => {
     setIsLoadingAudience(true);
-    fetch(`http://localhost:8000/api/v1/customers?page=${currentPage}&limit=10&sort_by=${sortBy}&min_spent=${minSpent}&max_spend=${maxSpent}&source_filter=${selectedSource}&t=${refreshTrigger}`)
+    fetch(`${API_BASE_URL}/api/v1/customers?page=${currentPage}&limit=10&sort_by=${sortBy}&min_spent=${minSpent}&max_spend=${maxSpent}&source_filter=${selectedSource}&t=${refreshTrigger}`)
       .then(res => res.json())
       .then(data => {
         setCustomers(data.customers);
@@ -82,7 +85,7 @@ export default function CRMDashboard() {
   // Fetch Campaigns for Manager & History Tabs
   const fetchCampaigns = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/v1/campaigns');
+      const res = await fetch(`${API_BASE_URL}/api/v1/campaigns`);
       const data = await res.json();
       setCampaignList(data.campaigns);
     } catch {
@@ -108,7 +111,7 @@ export default function CRMDashboard() {
 
     setIsUploading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/customers/upload', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/customers/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -132,7 +135,7 @@ export default function CRMDashboard() {
     if (!campaignName || !audiencePrompt) return toast.error("Please fill in campaign details");
     setIsProcessing(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/campaigns/generate-draft', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/generate-draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: campaignName, channel: 'WhatsApp', audience_criteria: audiencePrompt, message_template: "" })
@@ -152,7 +155,7 @@ export default function CRMDashboard() {
   const handleDispatch = async () => {
     setIsProcessing(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/campaigns/dispatch', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -178,7 +181,7 @@ export default function CRMDashboard() {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 600));
-      const res = await fetch(`http://localhost:8000/api/v1/campaigns/${metricsId}/analytics`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/${metricsId}/analytics`);
       const data = await res.json();
       setMetricsData({
         chart: Object.entries(data.metrics).map(([key, val]) => ({ name: key, value: val }))
@@ -194,7 +197,7 @@ export default function CRMDashboard() {
   const handleBulkAction = async (action: 'delete' | 'restore' | 'hard_delete') => {
     if (selectedCampaignIds.length === 0) return toast.error("No campaigns selected");
     try {
-      await fetch('http://localhost:8000/api/v1/campaigns/bulk-action', {
+      await fetch(`${API_BASE_URL}/api/v1/campaigns/bulk-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ campaign_ids: selectedCampaignIds, action })
