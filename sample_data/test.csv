@@ -1,0 +1,11 @@
+name,email,phone,total_spent
+Alice Smith,alice@example.com,+1234567890,150.50
+Bob Johnson,bob.j@example.com,+1987654321,45.00
+Charlie Davis,charlie.davis@email.com,+1122334455,320.75
+Diana Prince,diana.p@example.com,+1555666777,1200.00
+Evan Wright,evan.w@email.com,+1999888777,10.00
+Fiona Gallagher,fiona.g@example.com,+1444555666,85.20
+George Miller,george.m@email.com,+1777888999,540.00
+Hannah Abbott,hannah.a@example.com,+1333222111,210.30
+Ian Malcolm,ian.m@email.com,+1666777888,950.00
+Jenny Sparks,jenny.s@example.com,+1222333444,0.00
