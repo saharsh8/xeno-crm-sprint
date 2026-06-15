@@ -3,6 +3,8 @@ import os
 import csv
 import io
 import re
+import asyncio
+import random
 from typing import List
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -220,14 +222,15 @@ async def dispatch_campaign(
     }
 
 async def forward_to_channel_stub(campaign_id: int, payload: list):
-    CHANNEL_STUB_URL = "http://127.0.0.1:8001/api/v1/channel/send"
+    # Now points to your live Render public URL instead of localhost
+    CHANNEL_STUB_URL = "https://xeno-crm-sprint.onrender.com/api/v1/channel/send"
     async with httpx.AsyncClient() as client:
         try:
             await client.post(CHANNEL_STUB_URL, json={"campaign_id": campaign_id, "data": payload}, timeout=10.0)
         except Exception as e:
             print(f"Failed to communicate with Channel Service: {e}")
 
-# 6. Analytics Route (UPDATED WITH RECIPIENTS DATA)
+# 6. Analytics Route
 @app.get("/api/v1/campaigns/{campaign_id}/analytics")
 def get_campaign_analytics(campaign_id: int, db: Session = Depends(get_db)):
     # Join CommunicationLog with Customer to get the name/email/phone for the UI
@@ -280,3 +283,31 @@ def bulk_campaign_action(data: BulkActionRequest, db: Session = Depends(get_db))
     
     db.commit()
     return {"message": f"Successfully processed {len(data.campaign_ids)} campaigns."}
+
+
+# ==========================================
+# INTERNAL SIMULATED CHANNEL STUB SERVICE
+# ==========================================
+@app.post("/api/v1/channel/send")
+async def simulated_channel_service(payload: dict, background_tasks: BackgroundTasks):
+    """This acts as the 'separate' channel service requested in the assignment."""
+    background_tasks.add_task(process_and_fire_webhooks, payload)
+    return {"status": "accepted by channel stub"}
+
+async def process_and_fire_webhooks(payload: dict):
+    # The webhook receiver URL on your live CRM
+    WEBHOOK_URL = "https://xeno-crm-sprint.onrender.com/crm/receipt"
+    
+    async with httpx.AsyncClient() as client:
+        for item in payload.get("data", []):
+            # Simulate processing and network delay
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+            
+            # Randomize a realistic outcome for the Matrix Insights dashboard
+            status = random.choices(["DELIVERED", "OPENED", "FAILED"], weights=[0.5, 0.4, 0.1])[0]
+            
+            try:
+                # Fire the callback webhook back to the CRM
+                await client.post(WEBHOOK_URL, json={"log_id": item["log_id"], "status": status})
+            except Exception as e:
+                print(f"Webhook failed: {e}")
