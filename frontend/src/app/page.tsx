@@ -132,6 +132,48 @@ export default function CRMDashboard() {
     }
   };
 
+  // Handle Loading Sample Data Automatically
+  const handleLoadSampleData = async () => {
+    setIsUploading(true);
+    try {
+      // 1. Define the mock CSV exactly matching backend expectations
+      const sampleCsvData = `name,email,phone,total_spent
+Alex Mercer,alex.mercer@example.com,+1234567890,850.50
+Sarah Chen,sarah.chen@example.com,+1987654321,1200.00
+Marcus Johnson,marcus.j@example.com,+1122334455,150.75
+Elena Rodriguez,elena.r@example.com,+1555666777,2100.25
+David Kim,david.kim@example.com,+1888999000,45.00
+Rachel Green,rachel.g@example.com,+1999888777,630.00`;
+
+      // 2. Convert to a browser File object
+      const blob = new Blob([sampleCsvData], { type: 'text/csv' });
+      const file = new File([blob], 'sample_audience.csv', { type: 'text/csv' });
+
+      // 3. Append to FormData
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // 4. Send to the existing backend route
+      const res = await fetch(`${API_BASE_URL}/api/v1/customers/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      
+      const data = await res.json();
+      toast.success(`Sample Data Loaded! Added ${data.count} new records.`);
+      
+      setCurrentPage(1);
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load sample data. Is the backend running?");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleGenerateDraft = async () => {
     if (!campaignName || !audiencePrompt) return toast.error("Please fill in campaign details");
     setIsProcessing(true);
@@ -267,8 +309,8 @@ export default function CRMDashboard() {
           {/* 1. AUDIENCE TAB */}
           {activeTab === 'audience' && (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-full flex-1">
-               <div className="flex gap-4 mb-6">
-                 <div className="relative flex-1">
+               <div className="flex gap-4 mb-6 flex-wrap items-center">
+                 <div className="relative flex-1 min-w-[200px]">
                    <Search className="absolute left-3 top-3.5 text-slate-500" size={18} />
                    <input 
                      className="w-full pl-10 p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none text-slate-200"
@@ -277,7 +319,7 @@ export default function CRMDashboard() {
                    />
                  </div>
                  
-                 <div className="relative w-36">
+                 <div className="relative w-32">
                    <Filter className="absolute left-3 top-3.5 text-slate-500" size={18} />
                    <input 
                      type="number"
@@ -288,7 +330,7 @@ export default function CRMDashboard() {
                    />
                  </div>
 
-                 <div className="relative w-36">
+                 <div className="relative w-32">
                    <Filter className="absolute left-3 top-3.5 text-slate-500" size={18} />
                    <input 
                      type="number"
@@ -307,12 +349,25 @@ export default function CRMDashboard() {
                     {availableSources.map(src => <option key={src} value={src}>{src}</option>)}
                  </select>
 
-                 <div className="relative">
-                    <input type="file" id="csv-upload" accept=".csv" className="hidden" onChange={handleFileUpload} disabled={isUploading}/>
-                    <label htmlFor="csv-upload" className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-semibold cursor-pointer transition-colors shadow-md h-full">
-                      {isUploading ? <RefreshCcw className="animate-spin" size={18} /> : <Users size={18} />}
-                      {isUploading ? "Ingesting..." : "Import CSV"}
-                    </label>
+                 <div className="flex gap-3">
+                   {/* Load Sample Data Button */}
+                   <button 
+                     onClick={handleLoadSampleData}
+                     disabled={isUploading}
+                     className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-3 rounded-xl font-semibold transition-colors border border-slate-700 shadow-md whitespace-nowrap disabled:opacity-50"
+                   >
+                     {isUploading ? <RefreshCcw className="animate-spin" size={18} /> : <Sparkles size={18} className="text-indigo-400" />}
+                     Load Sample Data
+                   </button>
+
+                   {/* Existing CSV Upload */}
+                   <div className="relative">
+                      <input type="file" id="csv-upload" accept=".csv" className="hidden" onChange={handleFileUpload} disabled={isUploading}/>
+                      <label htmlFor="csv-upload" className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-semibold cursor-pointer transition-colors shadow-md h-full whitespace-nowrap disabled:opacity-50">
+                        {isUploading ? <RefreshCcw className="animate-spin" size={18} /> : <Users size={18} />}
+                        {isUploading ? "Ingesting..." : "Import CSV"}
+                      </label>
+                   </div>
                  </div>
                </div>
 
