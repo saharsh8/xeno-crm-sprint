@@ -78,7 +78,7 @@ cd frontend
 npm install
 ```markdown
 
-```env
+.env
 # Add this to your .env.local file in the frontend directory
 NEXT_PUBLIC_API_URL=http://localhost:8000
 **Run the development server:** After saving the file, ensure you have installed your dependencies (`npm install`) and start the frontend:
