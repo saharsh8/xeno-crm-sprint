@@ -69,7 +69,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/xeno_crm
     ```bash
 uvicorn main:app --reload --port 8000
 
-### 2. Frontend Setup
+### 1. Frontend Setup
 Open a new terminal, navigate to the frontend directory:
 
 ```bash
