@@ -77,7 +77,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/xeno_crm
 ### 2. Frontend Setup
 
 Open a new terminal, navigate to the frontend directory:
-```
+
 cd frontend
 npm install
 ```
