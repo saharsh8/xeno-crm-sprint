@@ -55,7 +55,7 @@ To handle high-volume concurrent campaign dispatches without blocking the main e
 
 If you wish to run this application locally, follow these steps:
 
-``` ### 1. Backend Setup
+```1. Backend Setup
 Navigate to the backend directory and set up your Python environment:
 ```bash
 cd backend
