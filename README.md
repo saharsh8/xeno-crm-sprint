@@ -54,8 +54,9 @@ To handle high-volume concurrent campaign dispatches without blocking the main e
 ## 🚀 Local Development Setup
 
 If you wish to run this application locally, follow these steps:
+
+### 1. Backend Setup
 ```
-``` ### 1. Backend Setup
 Navigate to the backend directory and set up your Python environment:
 ```bash
 cd backend
@@ -68,10 +69,10 @@ DATABASE_URL=postgresql://user:password@localhost:5432/xeno_crm
 **Run the server:** Once the file is saved, start your API in your terminal using:
     ```bash
 uvicorn main:app --reload --port 8000
-
-``` ### 2. Frontend Setup
+```
+### 2. Frontend Setup
+```
 Open a new terminal, navigate to the frontend directory:
-
 ```bash
 cd frontend
 npm install
