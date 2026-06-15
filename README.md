@@ -58,29 +58,35 @@ If you wish to run this application locally, follow these steps:
 ### 1. Backend Setup
 ```
 Navigate to the backend directory and set up your Python environment:
-```bash
+```
 cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```env
+```
+
 # Add this to your .env file in the backend directory
+```
 DATABASE_URL=postgresql://user:password@localhost:5432/xeno_crm
+```
 **Run the server:** Once the file is saved, start your API in your terminal using:
-    ```bash
-uvicorn main:app --reload --port 8000
+```
+   uvicorn main:app --reload --port 8000
+```
 ```
 ### 2. Frontend Setup
 ```
 Open a new terminal, navigate to the frontend directory:
-```bash
+```
 cd frontend
 npm install
-```markdown
-
-.env
+```
 # Add this to your .env.local file in the frontend directory
+```
 NEXT_PUBLIC_API_URL=http://localhost:8000
-**Run the development server:** After saving the file, ensure you have installed your dependencies (`npm install`) and start the frontend:
-    ```bash
-    npm run dev
+```
+
+Run the development server:** After saving the file, ensure you have installed your dependencies (`npm install`) and start the frontend:
+```
+ npm run dev
+```
