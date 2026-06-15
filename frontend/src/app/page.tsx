@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Send, BarChart3, Bot, X, Sparkles, RefreshCcw, Search, Filter, Edit3, CheckCircle2, UserCircle, Activity, Layers, Trash2, History, RotateCcw } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Toaster, toast } from 'sonner';
 
 // Safely determine the API URL based on the environment
@@ -186,7 +186,7 @@ export default function CRMDashboard() {
       const data = await res.json();
       setMetricsData({
         chart: Object.entries(data.metrics).map(([key, val]) => ({ name: key, value: val })),
-        recipients: data.recipients || [] // NEW: Populates the table
+        recipients: data.recipients || [] // Populates the table
       });
     } catch { 
       toast.error("Could not fetch analytics."); 
@@ -640,13 +640,24 @@ export default function CRMDashboard() {
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
                           <XAxis dataKey="name" />
                           <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                          <Tooltip cursor={{ fill: '#1e293b' }} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f1f5f9' }} />
+                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            {metricsData.chart.map((entry: any, index: number) => {
+                              const colors: Record<string, string> = {
+                                sent: '#64748b',      // Slate
+                                delivered: '#3b82f6', // Blue
+                                opened: '#10b981',    // Emerald
+                                clicked: '#8b5cf6',   // Violet
+                                failed: '#ef4444'     // Red
+                              };
+                              return <Cell key={`cell-${index}`} fill={colors[entry.name.toLowerCase()] || '#6366f1'} />;
+                            })}
+                          </Bar>
                         </BarChart>
                      </ResponsiveContainer>
                    </div>
 
-                   {/* NEW: Recipient Details Table */}
+                   {/* Recipient Details Table */}
                    {metricsData.recipients && metricsData.recipients.length > 0 && (
                      <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900 shadow-lg">
                        <div className="p-5 bg-slate-950/50 border-b border-slate-800 flex justify-between items-center">
