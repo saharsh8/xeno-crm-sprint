@@ -77,10 +77,3 @@ Start the development server:
 ```bash
 npm run dev
 
-Method	Endpoint	Description
-GET	/api/v1/customers	Fetches paginated, sorted, and filtered audience lists.
-POST	/api/v1/customers/upload	Ingests CSV files and updates the database.
-POST	/api/v1/campaigns/generate-draft	AI Copilot parser for intent and template generation.
-POST	/api/v1/campaigns/dispatch	Filters targets, creates logs, and triggers background task.
-POST	/crm/receipt	Webhook receiver for asynchronous delivery updates.
-GET	/api/v1/campaigns/{id}/analytics	Joins logs and customers for real-time campaign insights.
