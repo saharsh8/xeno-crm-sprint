@@ -31,6 +31,7 @@ export default function CRMDashboard() {
 
   // 3. AI Copilot State
   const [campaignName, setCampaignName] = useState('');
+  const [selectedChannel, setSelectedChannel] = useState('WhatsApp'); // NEW: Channel State
   const [audiencePrompt, setAudiencePrompt] = useState('');
   const [draftTemplate, setDraftTemplate] = useState('');
   const [copilotPhase, setCopilotPhase] = useState<'input' | 'review' | 'dispatched'>('input');
@@ -138,7 +139,8 @@ export default function CRMDashboard() {
       const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/generate-draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: campaignName, channel: 'WhatsApp', audience_criteria: audiencePrompt, message_template: "" })
+        // NEW: Uses dynamic selectedChannel
+        body: JSON.stringify({ name: campaignName, channel: selectedChannel, audience_criteria: audiencePrompt, message_template: "" })
       });
       const data = await res.json();
       setDraftTemplate(data.suggested_template);
@@ -158,9 +160,10 @@ export default function CRMDashboard() {
       const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // NEW: Uses dynamic selectedChannel
         body: JSON.stringify({ 
           name: campaignName, 
-          channel: 'WhatsApp', 
+          channel: selectedChannel, 
           template: draftTemplate, 
           min_spend: minSpent,
           max_spend: maxSpent,
@@ -384,6 +387,27 @@ export default function CRMDashboard() {
                     <label className="block text-sm font-medium text-slate-300 mb-2">Campaign Name</label>
                     <input className="w-full p-3.5 border border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 bg-slate-950 text-slate-100" placeholder="e.g., Q3 VIP Reactivation" onChange={e => setCampaignName(e.target.value)} />
                   </div>
+                  
+                  {/* NEW: Channel Selector UI */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Messaging Channel</label>
+                    <div className="flex gap-3">
+                      {['WhatsApp', 'SMS', 'Email', 'RCS'].map(channel => (
+                        <button
+                          key={channel}
+                          onClick={() => setSelectedChannel(channel)}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                            selectedChannel === channel 
+                              ? 'bg-indigo-600 text-white shadow-md border border-indigo-500' 
+                              : 'bg-slate-950 border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                          }`}
+                        >
+                          {channel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Target Audience Context</label>
                     <textarea className="w-full p-3.5 border border-slate-700 rounded-xl h-36 focus:ring-2 focus:ring-indigo-500/50 bg-slate-950 text-slate-100 resize-none" placeholder="e.g., Find shoppers who spend less than $120..." onChange={e => setAudiencePrompt(e.target.value)} />
@@ -397,7 +421,10 @@ export default function CRMDashboard() {
               {copilotPhase === 'review' && (
                 <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
                   <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl flex justify-between items-center">
-                    <div><h3 className="text-slate-200 font-semibold">{campaignName}</h3><p className="text-slate-400 text-sm truncate w-96">{audiencePrompt}</p></div>
+                    <div>
+                      <h3 className="text-slate-200 font-semibold">{campaignName} <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 border border-slate-600">{selectedChannel}</span></h3>
+                      <p className="text-slate-400 text-sm truncate w-96 mt-1">{audiencePrompt}</p>
+                    </div>
                     <button onClick={() => setCopilotPhase('input')} className="text-indigo-400 text-sm hover:underline">Edit Setup</button>
                   </div>
 
