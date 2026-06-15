@@ -4,9 +4,6 @@ An intelligent, fully decoupled Mini CRM designed to help retail brands intuitiv
 
 Built as a take-home engineering assessment for the Xeno SDE role.
 
-**🎥 [Watch the Video Walkthrough Here](Insert Your Video Link Here)**
-**🌐 [Live Vercel Frontend](Insert Your Vercel URL Here)**
-**⚙️ [Live Render Backend API](Insert Your Render URL Here)**
 
 ---
 
