@@ -62,18 +62,24 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-Create a .env file in the backend directory and add your PostgreSQL Database URL:
+```env
+# Add this to your .env file in the backend directory
 DATABASE_URL=postgresql://user:password@localhost:5432/xeno_crm
-Run the FastAPI server:uvicorn main:app --reload --port 8000
+**Run the server:** Once the file is saved, start your API in your terminal using:
+    ```bash
+uvicorn main:app --reload --port 8000
 
 ### 2. Frontend Setup
 Open a new terminal, navigate to the frontend directory:
+
 ```bash
 cd frontend
 npm install
-Create a .env.local file in the frontend directory to point to the local API:
-NEXT_PUBLIC_API_URL=http://localhost:8000
-Start the development server:
-```bash
-npm run dev
+```markdown
 
+```env
+# Add this to your .env.local file in the frontend directory
+NEXT_PUBLIC_API_URL=http://localhost:8000
+**Run the development server:** After saving the file, ensure you have installed your dependencies (`npm install`) and start the frontend:
+    ```bash
+    npm run dev
