@@ -227,18 +227,34 @@ async def forward_to_channel_stub(campaign_id: int, payload: list):
         except Exception as e:
             print(f"Failed to communicate with Channel Service: {e}")
 
-# 6. Analytics Route
+# 6. Analytics Route (UPDATED WITH RECIPIENTS DATA)
 @app.get("/api/v1/campaigns/{campaign_id}/analytics")
 def get_campaign_analytics(campaign_id: int, db: Session = Depends(get_db)):
-    logs = db.query(models.CommunicationLog).filter(models.CommunicationLog.campaign_id == campaign_id).all()
+    # Join CommunicationLog with Customer to get the name/email/phone for the UI
+    logs = db.query(models.CommunicationLog, models.Customer).join(
+        models.Customer, models.CommunicationLog.customer_id == models.Customer.id
+    ).filter(models.CommunicationLog.campaign_id == campaign_id).all()
     
     stats = {"sent": 0, "delivered": 0, "opened": 0, "failed": 0, "clicked": 0}
-    for log in logs:
+    recipients = []
+    
+    for log, customer in logs:
         current_status = log.status.lower() if log.status else "sent"
         if current_status in stats:
             stats[current_status] += 1
             
-    return {"campaign_id": campaign_id, "metrics": stats}
+        recipients.append({
+            "name": customer.name,
+            "email": customer.email,
+            "phone": customer.phone,
+            "status": log.status.upper() if log.status else "SENT"
+        })
+            
+    return {
+        "campaign_id": campaign_id, 
+        "metrics": stats,
+        "recipients": recipients
+    }
 
 # --- Campaign Manager & History Routes ---
 

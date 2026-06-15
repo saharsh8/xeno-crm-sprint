@@ -31,7 +31,7 @@ export default function CRMDashboard() {
 
   // 3. AI Copilot State
   const [campaignName, setCampaignName] = useState('');
-  const [selectedChannel, setSelectedChannel] = useState('WhatsApp'); // NEW: Channel State
+  const [selectedChannel, setSelectedChannel] = useState('WhatsApp');
   const [audiencePrompt, setAudiencePrompt] = useState('');
   const [draftTemplate, setDraftTemplate] = useState('');
   const [copilotPhase, setCopilotPhase] = useState<'input' | 'review' | 'dispatched'>('input');
@@ -139,7 +139,6 @@ export default function CRMDashboard() {
       const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/generate-draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // NEW: Uses dynamic selectedChannel
         body: JSON.stringify({ name: campaignName, channel: selectedChannel, audience_criteria: audiencePrompt, message_template: "" })
       });
       const data = await res.json();
@@ -160,7 +159,6 @@ export default function CRMDashboard() {
       const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // NEW: Uses dynamic selectedChannel
         body: JSON.stringify({ 
           name: campaignName, 
           channel: selectedChannel, 
@@ -187,7 +185,8 @@ export default function CRMDashboard() {
       const res = await fetch(`${API_BASE_URL}/api/v1/campaigns/${metricsId}/analytics`);
       const data = await res.json();
       setMetricsData({
-        chart: Object.entries(data.metrics).map(([key, val]) => ({ name: key, value: val }))
+        chart: Object.entries(data.metrics).map(([key, val]) => ({ name: key, value: val })),
+        recipients: data.recipients || [] // NEW: Populates the table
       });
     } catch { 
       toast.error("Could not fetch analytics."); 
@@ -388,7 +387,7 @@ export default function CRMDashboard() {
                     <input className="w-full p-3.5 border border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 bg-slate-950 text-slate-100" placeholder="e.g., Q3 VIP Reactivation" onChange={e => setCampaignName(e.target.value)} />
                   </div>
                   
-                  {/* NEW: Channel Selector UI */}
+                  {/* Channel Selector UI */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Messaging Channel</label>
                     <div className="flex gap-3">
@@ -538,7 +537,7 @@ export default function CRMDashboard() {
             </div>
           )}
 
-          {/* 4. HISTORY TAB (NEW) */}
+          {/* 4. HISTORY TAB */}
           {activeTab === 'history' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-full flex-1">
               <div className="flex justify-between items-center mb-6">
@@ -631,9 +630,61 @@ export default function CRMDashboard() {
                     {isLoadingAnalytics ? "Loading..." : "Load Analytics"}
                  </button>
                </div>
+               
                {metricsData && (
-                 <div className="h-80 w-full mt-8 p-6 border border-slate-800 rounded-2xl bg-slate-950/30">
-                   <ResponsiveContainer width="100%" height="100%"><BarChart data={metricsData.chart}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Bar dataKey="value" fill="#6366f1" /></BarChart></ResponsiveContainer>
+                 <div className="space-y-6 w-full mt-8 animate-in slide-in-from-bottom-4 duration-500">
+                   {/* Analytics Chart */}
+                   <div className="h-80 p-6 border border-slate-800 rounded-2xl bg-slate-950/30">
+                     <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={metricsData.chart}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                     </ResponsiveContainer>
+                   </div>
+
+                   {/* NEW: Recipient Details Table */}
+                   {metricsData.recipients && metricsData.recipients.length > 0 && (
+                     <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900 shadow-lg">
+                       <div className="p-5 bg-slate-950/50 border-b border-slate-800 flex justify-between items-center">
+                         <h3 className="font-semibold text-slate-200">Recipient Communication Logs</h3>
+                         <span className="text-xs font-bold px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full">
+                           {metricsData.recipients.length} Targets
+                         </span>
+                       </div>
+                       <div className="max-h-64 overflow-y-auto">
+                         <table className="w-full text-left text-sm">
+                           <thead className="bg-slate-950/80 sticky top-0 z-10 backdrop-blur-sm">
+                             <tr className="text-slate-500 uppercase tracking-wider text-xs">
+                               <th className="p-4 font-medium">Customer Name</th>
+                               <th className="p-4 font-medium">Contact</th>
+                               <th className="p-4 font-medium text-right">Delivery Status</th>
+                             </tr>
+                           </thead>
+                           <tbody>
+                             {metricsData.recipients.map((r: any, idx: number) => (
+                               <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                                 <td className="p-4 text-slate-200 font-medium">{r.name}</td>
+                                 <td className="p-4 text-slate-400">{r.email || r.phone}</td>
+                                 <td className="p-4 text-right">
+                                   <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${
+                                     r.status === 'DELIVERED' || r.status === 'OPENED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                                     r.status === 'FAILED' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 
+                                     'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                   }`}>
+                                     {r.status || 'SENT'}
+                                   </span>
+                                 </td>
+                               </tr>
+                             ))}
+                           </tbody>
+                         </table>
+                       </div>
+                     </div>
+                   )}
                  </div>
                )}
              </div>
